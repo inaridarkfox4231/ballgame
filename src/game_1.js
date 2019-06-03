@@ -233,7 +233,7 @@ class ball{
 	update(){
 		// countを進める、60に達したら乗り換え、失敗したらDEAD. LIVEのときしかupdateしない。
 		if(!(this.state & LIVE)){ return; }
-		this.count += 0.5;
+		if(keyIsDown(65)){ this.count += 1.0; }else{ this.count += 0.5; } // Aキーで加速
 		if(this.count > 60){
 			this.convert();
 		}
@@ -385,18 +385,30 @@ function createBlockArray(posArray){
 }
 
 function createStage(stageNumber){
+	//if(stageNumber === 1){ createStage_test(); return; }
 	let d = data["stage" + stageNumber];
-	//let posArray = [32, 33, 42, 43, 64, 65, 54, 55, 10, 11, 12, 17, 67, 68, 69];
 	let posArray = d.posArray;
 	let typeArray = d.typeArray;
 	let stateArray = constArray(d.state, STATIC);
 	stateArray.push(...constArray(d.freeze, FREEZE));
 	createUnitArray(posArray, typeArray, stateArray);
 	createBlockArray(d.blockArray);
-	//console.log(data.cursorPos);
 	myCursor.set_cursor(d.cursorPos % 10, Math.floor(d.cursorPos / 10));
 	myBall.set_unit(uArray[d.ballPos], 0);
 }
+
+// テスト用のクリエイト関数
+/*
+function createStage_test(){
+	let posArray = ;
+	let typeArray = ;
+	let stateArray = constArray(10, STATIC);
+	stateArray.push(...constArray(2, FREEZE));
+	createUnitArray(posArray, typeArray, stateArray);
+	createBlockArray();
+	myCursor.set_cursor(41 % 10, Math.floor(41 / 10));
+	myBall.set_unit(uArray[11], 0);
+}*/
 
 function constArray(n, s){
 	let array = new Array(n);
