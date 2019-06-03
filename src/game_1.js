@@ -11,14 +11,20 @@ let myCursor;
 let uArray = [];
 let blocks = [];
 let myBall;
+let stageNumber;
+const LAST_STAGE_NUMBER = 2;
+
+let intervalCount;
 
 let data;
 const STATIC = 1;
 const MOVE = 2;
 const FREEZE = 4;
 
-const LIVE = 1;
-const DEAD = 2;
+const WAIT = 1;
+const LIVE = 2;
+const DEAD = 4;
+const CLEAR = 8;
 
 function preload(){
 	data = loadJSON("https://inaridarkfox4231.github.io/gameData/stage.json");
@@ -28,7 +34,9 @@ function setup() {
 	createCanvas(600, 480);
 	myCursor = new cursor();
 	myBall = new ball();
-	createStage(1);
+	stageNumber = 1;
+	createStage(stageNumber);
+	intervalCount = 60;
 	//noLoop();
 }
 
@@ -41,12 +49,60 @@ function draw() {
 	uArray.forEach((u) => {
 		u.render();
 	});
-	myCursor.render();
 	blocks.forEach((b) => {
 		b.render();
 	});
-	myBall.update();
-	myBall.render();
+	myCursor.render();
+	if(myBall.state & WAIT){
+	  /* 画面を透明で覆ってステージ数表示 */
+		push();
+		fill(0, 0, 0, 120);
+		rect(0, 0, width, height);
+		textSize(40);
+		fill(255);
+		text("STAGE" + stageNumber, 100, 100);
+		pop();
+		intervalCount--;
+		if(intervalCount === 0){ myBall.state = LIVE; }
+	}
+	else if(myBall.state & LIVE){
+	  /* myBallのupdateとrender. */
+	  myBall.update();
+ 	  myBall.render();
+ }
+	else if(myBall.state & DEAD){
+	  /* FAILED...の表示のあとで同じステージのやり直し */
+		push();
+		fill(0, 0, 0, 120);
+		rect(0, 0, width, height);
+		textSize(40);
+		fill(255);
+		text("FAILED...", 100, 100);
+		pop();
+		intervalCount--;
+		if(intervalCount === 0){
+			myBall.state = WAIT;
+			intervalCount = 60;
+			createStage(stageNumber);
+		}
+	}
+	else if(myBall.state & CLEAR){
+	  /* CLEAR!の表示のあと新しいステージになってWAITに戻る */
+		push();
+		fill(0, 0, 0, 120);
+		rect(0, 0, width, height);
+		textSize(40);
+		fill(255);
+		text("CLEAR!", 100, 100);
+		pop();
+		intervalCount--;
+		if(intervalCount === 0){
+			myBall.state = WAIT;
+			intervalCount = 60;
+			stageNumber = (stageNumber % LAST_STAGE_NUMBER) + 1;
+			createStage(stageNumber);
+		}
+	}
 }
 
 // unitのupdateかなんかで上下左右にユニットがないかとか、
@@ -66,6 +122,12 @@ function draw() {
 // 2進数にしておいてよかった。このふたつは重なり合うので、注意しないとね・・じゃあ |= にしないとだね。FREEZEが解除されちゃう。
 // 元のユニットでINBALLを解除する。
 // ・・ボールは別のクラスにしようね。
+
+// 最初にSTAGE1みたいに表示される・・透明なカバー、白い文字。
+// 文字の表示のあと自動的にスタート。
+// クリアした場合は次のステージが始まる。クリアーの文字のあとで。
+// 失敗の場合は同じステージから再スタート。
+// 5つくらい、全部クリアで元に戻る。初めから。多分そんな感じ？？
 class unit{
 	constructor(x, y, id0, id1, selfId, state){
 		this.x = x;
@@ -118,6 +180,7 @@ class cursor{
 	set_cursor(x, y){
 		this.x = x;
 		this.y = y;
+		this.target = undefined; // ターゲットリセット。
 	}
 	update(dx, dy){
 		// はみだすのNG.
@@ -157,7 +220,7 @@ class ball{
 		this.count = 0;
 		this.in = -1;  // ユニットの入口
 		this.out = -1; // ユニットの出口
-		this.state = LIVE;
+		this.state = WAIT;
 	}
 	set_unit(u, inId){
 		this.currentUnit = u;
@@ -168,16 +231,16 @@ class ball{
 		u.inball = true;
 	}
 	update(){
-		// countを進める、60に達したら乗り換え、失敗したらDEAD.
-		if(this.state & DEAD){ return; }
+		// countを進める、60に達したら乗り換え、失敗したらDEAD. LIVEのときしかupdateしない。
+		if(!(this.state & LIVE)){ return; }
 		this.count += 0.5;
 		if(this.count > 60){
 			this.convert();
 		}
 	}
 	render(){
-		// countとinId, outIdに応じてボールを描画
-		if(this.state & DEAD){ return; }
+		// countとinId, outIdに応じてボールを描画. LIVEのときしか描画しない。
+		if(!(this.state & LIVE)){ return; }
 		push();
 		translate(this.currentUnit.x * 60 + 30, this.currentUnit.y * 60 + 30);
 	  noStroke();
@@ -201,7 +264,10 @@ class ball{
 		this.currentUnit.inball = false;
 		let direction = calc_dir(this.out);
 		let x = this.currentUnit.x + direction[0], y = this.currentUnit.y + direction[1];
+		// クリアは基本的に右端に達した時とする。
+		if(x === 10){ this.clear(); return; }
 		let nextUnitId = find_unit(x, y);
+		// 右端に達する以外で何もない場合にFAILEDってことで。
 		if(nextUnitId < 0){ this.kill(); return; }
 		let nextIn = (this.out + 2) % 4; // 次のinに設定される入口のid. これをnextUnitが持っていなければDEAD.
 		// 具体的には0, 2なら2, 0で1, 3なら3, 1.
@@ -214,6 +280,13 @@ class ball{
 		this.currentUnit = undefined;
 		this.count = 0;
 		this.state = DEAD;
+		intervalCount = 60; // FAILEDの表示時間
+	}
+	clear(){
+		this.currentUnit = undefined;
+		this.count = 0;
+		this.state = CLEAR;
+		intervalCount = 60;
 	}
 }
 
@@ -236,18 +309,9 @@ class block{
 function keyPressed() {
 	if(keyCode === 32){
 		// スペースキーでユニット捕獲、解除
-		let id = find_unit(myCursor.x, myCursor.y);
-		if(id < 0){ return; }
-		let u = uArray[id];
-		if(myCursor.target === undefined){
-			if((u.state & FREEZE) || u.inball){ return; } // ボールが入っているか、FREEZEのユニットは捕獲できない
-			myCursor.set_target(u);
-			return;
-		}else{
-			myCursor.remove_target();
-			return;
-		}
+    catch_unit(); return;
 	}
+  if(!(myBall.state & LIVE)){ return; } // LIVEのときしかカーソルを動かせない
 	// 十字キーでカーソルの移動
 	let diffX = 0, diffY = 0;
   if (keyCode === RIGHT_ARROW) {
@@ -274,6 +338,20 @@ function find_block(x, y){
 		if(blocks[i].x === x && blocks[i].y === y){ return i; }
 	}
 	return -1;
+}
+
+function catch_unit(){
+	let id = find_unit(myCursor.x, myCursor.y);
+	if(id < 0){ return; }
+	let u = uArray[id];
+	if(myCursor.target === undefined){
+		if((u.state & FREEZE) || u.inball){ return; } // ボールが入っているか、FREEZEのユニットは捕獲できない
+		myCursor.set_target(u);
+		return;
+	}else{
+		myCursor.remove_target();
+		return;
+	}
 }
 
 function calc_dir(id){
