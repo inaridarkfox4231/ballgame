@@ -12,7 +12,7 @@ let uArray = [];
 let blocks = [];
 let myBall;
 let stageNumber;
-const LAST_STAGE_NUMBER = 2;
+const LAST_STAGE_NUMBER = 3;
 
 let intervalCount;
 
