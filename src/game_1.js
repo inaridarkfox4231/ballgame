@@ -12,7 +12,7 @@ let uArray = [];
 let blocks = [];
 let myBall;
 let stageNumber;
-const LAST_STAGE_NUMBER = 3;
+const LAST_STAGE_NUMBER = 4;
 
 let intervalCount;
 
@@ -400,14 +400,14 @@ function createStage(stageNumber){
 // テスト用のクリエイト関数
 /*
 function createStage_test(){
-	let posArray = [21, 22, 23, 24, 35, 44, 53, 64, 65, 66, 67, 31, 38, 39, 41, 50, 51];
-	let typeArray = [9, 8, 8, 14, 13, 13, 13, 4, 12, 8, 8, 13, 8, 8, 13, 8, 12];
-	let stateArray = constArray(11, STATIC);
-	stateArray.push(...constArray(6, FREEZE));
+	let posArray = [51, 41, 42, 44, 45, 47, 38, 48, 50, 43, 46, 29];
+	let typeArray = [8, 12, 9, 8, 8, 8, 13, 9, 8, 8, 8, 8];
+	let stateArray = constArray(8, STATIC);
+	stateArray.push(...constArray(4, FREEZE));
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([0, 10, 20, 30, 40, 60, 70, 61, 71, 62, 72, 7, 8, 9, 17, 18, 19, 27, 28, 29, 48, 58, 68, 78, 49, 59, 69, 79, 32, 33, 55, 56, 36, 14]);
-	myCursor.set_cursor(50 % 10, Math.floor(50 / 10));
-	myBall.set_unit(uArray[15], 0);
+	createBlockArray([0, 10, 20, 30, 40, 60, 70, 3, 23, 33, 53, 63, 73, 6, 16, 26, 36, 56, 76, 9, 19, 39, 49, 59, 69, 79]);
+	myCursor.set_cursor(51 % 10, Math.floor(51 / 10));
+	myBall.set_unit(uArray[8], 0);
 }*/
 
 function constArray(n, s){
