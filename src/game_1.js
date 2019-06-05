@@ -12,8 +12,9 @@ let uArray = [];
 let blocks = [];
 let myBall;
 let stageNumber;
+let gridSize;
 const LAST_STAGE_NUMBER = 8;
-const GRID_SIZE = 60;
+//const GRID_SIZE = 60;
 
 let intervalCount;
 
@@ -33,9 +34,11 @@ function preload(){
 
 function setup() {
 	createCanvas(600, 480);
+	// これを720x480にして、9面以降はgridSize = 48にしたい。で、12x8のサイズから15x10のサイズにスケールアップとかそういう？
 	myCursor = new cursor();
 	myBall = new ball();
 	stageNumber = 1;
+	gridSize = 0;
 	createStage(stageNumber);
 	intervalCount = 60;
 	//noLoop();
@@ -143,19 +146,19 @@ class unit{
 	}
 	render(){
 		push();
-		let ax = this.x * GRID_SIZE;
-		let ay = this.y * GRID_SIZE;
+		let ax = this.x * gridSize;
+		let ay = this.y * gridSize;
 		noStroke();
 		if(this.state & STATIC){ fill(238, 185, 0); }else if(this.state & MOVE){ fill(0, 0, 255); }else if(this.state & FREEZE){ fill(255, 0, 0); }
 		translate(ax, ay);
-		rect(0, 0, GRID_SIZE, GRID_SIZE);
+		rect(0, 0, gridSize, gridSize);
 		if(this.state & STATIC){ fill(255, 230, 140); }else if(this.state & MOVE){ fill(180, 180, 255); }else if(this.state & FREEZE){ fill(255, 180, 180); }
 		unit.drawPath(this.patternId[0]);
 		unit.drawPath(this.patternId[1]);
 		pop();
 	}
 	static drawPath(id){
-		let gs = GRID_SIZE / 3;
+		let gs = gridSize / 3;
 		switch(id){
 			case 0:
 				rect(0, gs, gs * 2, gs);
@@ -186,7 +189,7 @@ class cursor{
 	}
 	update(dx, dy){
 		// はみだすのNG.
-		if(this.x + dx < 0 || this.x + dx > (width / GRID_SIZE) - 1 || this.y + dy < 0 || this.y + dy > (height / GRID_SIZE) - 1){ return; }
+		if(this.x + dx < 0 || this.x + dx > (width / gridSize) - 1 || this.y + dy < 0 || this.y + dy > (height / gridSize) - 1){ return; }
 		// 重なるのNG.
 		if(this.target !== undefined && find_unit(this.x + dx, this.y + dy) >= 0){ return; }
 		// ブロックNG.
@@ -211,7 +214,7 @@ class cursor{
 		strokeWeight(3.0);
 		stroke(110);
 		noFill();
-		rect(this.x * GRID_SIZE, this.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+		rect(this.x * gridSize, this.y * gridSize, gridSize, gridSize);
 		pop();
 	}
 }
@@ -236,7 +239,7 @@ class ball{
 		// countを進める、60に達したら乗り換え、失敗したらDEAD. LIVEのときしかupdateしない。
 		if(!(this.state & LIVE)){ return; }
 		if(keyIsDown(65)){ this.count += 1.5; }else{ this.count += 0.5; } // Aキーで加速
-		if(this.count > GRID_SIZE){
+		if(this.count > gridSize){
 			this.convert();
 		}
 	}
@@ -244,16 +247,16 @@ class ball{
 		// countとinId, outIdに応じてボールを描画. LIVEのときしか描画しない。
 		if(!(this.state & LIVE)){ return; }
 		push();
-		translate(this.currentUnit.x * GRID_SIZE + GRID_SIZE / 2, this.currentUnit.y * GRID_SIZE + GRID_SIZE / 2);
+		translate(this.currentUnit.x * gridSize + gridSize / 2, this.currentUnit.y * gridSize + gridSize / 2);
 	  noStroke();
 		fill(100);
 		let v = this.calc_pos();
-		let diam = (GRID_SIZE / 3) * 0.8;
+		let diam = (gridSize / 3) * 0.8;
 		ellipse(v[0], v[1], diam, diam);
 		pop();
 	}
 	calc_pos(){
-		let border = GRID_SIZE / 2;
+		let border = gridSize / 2;
 		let use_id = (this.count < border ? this.in : this.out);
 		let t = (use_id % 3 === 0 ? this.count - border : border - this.count);
 		t *= (this.count < border ? 1 : -1);
@@ -269,7 +272,7 @@ class ball{
 		let direction = calc_dir(this.out);
 		let x = this.currentUnit.x + direction[0], y = this.currentUnit.y + direction[1];
 		// クリアは基本的に右端に達した時とする。
-		if(x > (width / GRID_SIZE) - 1){ this.clear(); return; }
+		if(x > (width / gridSize) - 1){ this.clear(); return; }
 		let nextUnitId = find_unit(x, y);
 		// 右端に達する以外で何もない場合にFAILEDってことで。
 		if(nextUnitId < 0){ this.kill(); return; }
@@ -300,12 +303,12 @@ class block{
 		this.y = y;
 	}
 	render(){
-		let ax = this.x * GRID_SIZE;
-		let ay = this.y * GRID_SIZE;
+		let ax = this.x * gridSize;
+		let ay = this.y * gridSize;
 		push();
 		fill(185, 122, 107);
 		noStroke();
-		rect(ax, ay, GRID_SIZE, GRID_SIZE);
+		rect(ax, ay, gridSize, gridSize);
 		pop();
 	}
 }
@@ -376,7 +379,7 @@ function createUnitArray(posArray, typeArray, stateArray){
 	for(let i = 0; i < posArray.length; i++){
 		let p = posArray[i];
 		let t = typeArray[i];
-		let col = Math.floor(width / GRID_SIZE);
+		let col = Math.floor(width / gridSize);
 		uArray.push(new unit(p % col, Math.floor(p / col), t & 3, (t >> 2) & 3, i, stateArray[i]));
 	}
 }
@@ -385,7 +388,7 @@ function createBlockArray(posArray){
 	blocks = [];
 	for(let i = 0; i < posArray.length; i++){
 		let p = posArray[i];
-		let col = Math.floor(width / GRID_SIZE);
+		let col = Math.floor(width / gridSize);
 		blocks.push(new block(p % col, Math.floor(p / col)));
 	}
 }
@@ -393,13 +396,17 @@ function createBlockArray(posArray){
 function createStage(stageNumber){
 	//if(stageNumber === 1){ createStage_test(); return; }
 	let d = data["stage" + stageNumber];
+	//console.log(gridSize);
+	gridSize = d.gridSize;
+	//console.log(d.gridSize);
 	let posArray = d.posArray;
 	let typeArray = d.typeArray;
 	let stateArray = constArray(d.static, STATIC);
 	stateArray.push(...constArray(d.freeze, FREEZE));
 	createUnitArray(posArray, typeArray, stateArray);
+	//console.log(uArray);
 	createBlockArray(d.blockArray);
-	let col = Math.floor(width / GRID_SIZE);
+	let col = Math.floor(width / gridSize);
 	myCursor.set_cursor(d.cursorPos % col, Math.floor(d.cursorPos / col));
 	// ここfind_unitで出せるようにしたい。いちいち番号変えるの面倒。
 	//myBall.set_unit(uArray[d.ballPos], 0);
