@@ -13,6 +13,15 @@ let blocks = [];
 let myBall;
 let stageNumber;
 let gridSize;
+// row(行数、横の列の本数)とcol(列数、縦の列の本数)もグローバルにして（本来はクラスとかにしてまとめるべき・・）、
+// ステージごとにサイズを決められるようにしたら面白そう。
+// あとスタート位置とかフェイズとかゴール条件とかいじって上とか下から出たり入ったりできるようにしたいわね。
+// STATIC MOVE FREEZE GOALでゴールは緑にするとか。ゴールは基本的にフリーズ扱いで（スタートについては単にフリーズ）、
+// あ、スタートをSTATICにしても別にいいのか。スタートがフリーズである必要は全くないものね。
+// ゴールはあちこち移動しちゃまずいからFREEZE扱いのGOALにする、と。
+// FREEZEのすべてのプロパティを受け継ぎつつかつそれをくぐるとクリアするみたいなやつー
+// スタート位置で遊ぶ場合は0のデフォルトもいじる（スタートフェイズ）。
+// row, col, startPhase, goalPos.
 const LAST_STAGE_NUMBER = 8;
 //const GRID_SIZE = 60;
 
@@ -35,6 +44,7 @@ function preload(){
 function setup() {
 	createCanvas(600, 480);
 	// これを720x480にして、9面以降はgridSize = 48にしたい。で、12x8のサイズから15x10のサイズにスケールアップとかそういう？
+	// 必要ない。ステージごとに横幅と縦幅を設定すればいいだけ。48の他に、3の倍数なら何でも。36とかでもいける。
 	myCursor = new cursor();
 	myBall = new ball();
 	stageNumber = 1;
@@ -417,14 +427,17 @@ function createStage(stageNumber){
 // テスト用のクリエイト関数
 /*
 function createStage_test(){
+	gridSize = 60;
 	let posArray = [21, 31, 51, 52, 4, 30, 41, 39, 74];
 	let typeArray = [9 ,12, 14, 4, 4, 8, 13, 8, 8];
 	let stateArray = constArray(4, STATIC);
 	stateArray.push(...constArray(5, FREEZE));
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([0, 10, 20, 40, 50, 60, 70, 42, 43, 44, 54, 64, 5, 15, 25, 26, 27, 28, 29, 9, 19, 49, 59, 69, 79]);
-	myCursor.set_cursor(31 % 10, Math.floor(31 / 10));
-	myBall.set_unit(uArray[5], 0);
+	createBlockArray([0, 10, 20, 40, 50, 60, 70, 42, 43, 44, 54, 64, 5, 35, 25, 26, 27, 29, 9, 19, 49, 59, 69, 79, 33, 46, 55]);
+	let col = Math.floor(width / gridSize);
+	myCursor.set_cursor(31 % col, Math.floor(31 / col));
+	let index = find_unit(30 % col, Math.floor(30 / col));
+	myBall.set_unit(uArray[index], 0);
 }*/
 
 function constArray(n, s){
