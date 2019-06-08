@@ -13,7 +13,8 @@ let blocks = [];
 let myBall;
 let stageNumber;
 let gridSize;
-let col; // colだけでいいやね
+let row; // rowがないとだめだろ。カーソルはみだしちゃう。
+let col; // col.
 // row(行数、横の列の本数)とcol(列数、縦の列の本数)もグローバルにして（本来はクラスとかにしてまとめるべき・・）、
 // ステージごとにサイズを決められるようにしたら面白そう。
 // あとスタート位置とかフェイズとかゴール条件とかいじって上とか下から出たり入ったりできるようにしたいわね。
@@ -52,6 +53,7 @@ function setup() {
 	stageNumber = 1;
 	gridSize = 0;
 	col = 0;
+	row = 0;
 	createStage(stageNumber);
 	intervalCount = 60;
 	//noLoop();
@@ -61,7 +63,7 @@ function draw() {
 	background(100);
 	push();
 	fill(220);
-	rect(0, 0, width, height);
+	rect(0, 0, col * gridSize, row * gridSize);
 	pop();
 	uArray.forEach((u) => {
 		u.render();
@@ -202,7 +204,7 @@ class cursor{
 	}
 	update(dx, dy){
 		// はみだすのNG.
-		if(this.x + dx < 0 || this.x + dx > (width / gridSize) - 1 || this.y + dy < 0 || this.y + dy > (height / gridSize) - 1){ return; }
+		if(this.x + dx < 0 || this.x + dx > col - 1 || this.y + dy < 0 || this.y + dy > row - 1){ return; }
 		// 重なるのNG.
 		if(this.target !== undefined && find_unit(this.x + dx, this.y + dy) >= 0){ return; }
 		// ブロックNG.
@@ -409,10 +411,11 @@ function createBlockArray(posArray){
 }
 
 function createStage(stageNumber){
-	if(stageNumber === 1){ createStage_test(); return; }
+	//if(stageNumber === 1){ createStage_test(); return; }
 	let d = data["stage" + stageNumber];
 	gridSize = d.gridSize;
 	col = d.col;
+	row = d.row;
 	let stateArray = constArray(d.static, STATIC);
 	stateArray.push(...constArray(d.freeze, FREEZE));
 	stateArray.push(GOAL); // 末尾をゴール用にすればgoalPosの必要はないよね。
@@ -425,10 +428,11 @@ function createStage(stageNumber){
 }
 
 // テスト用のクリエイト関数
-
+/*
 function createStage_test(){
 	gridSize = 60;
 	col = 6;
+	row = 6;
 	let posArray = [10, 13, 14, 15, 16, 12, 4];
 	let typeArray = [13, 8, 8, 8, 12, 8, 13];
 	let stateArray = constArray(5, STATIC);
@@ -439,7 +443,7 @@ function createStage_test(){
 	myCursor.set_cursor(13 % col, Math.floor(13 / col));
 	let index = find_unit(12 % col, Math.floor(12 / col));
 	myBall.set_unit(uArray[index], 0);
-}
+}*/
 
 function constArray(n, s){
 	let array = new Array(n);
