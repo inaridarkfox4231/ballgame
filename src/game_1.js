@@ -32,6 +32,7 @@ let data;
 const STATIC = 1;
 const MOVE = 2;
 const FREEZE = 4;
+const GOAL = 8;  // GOALは基本FREEZEで、クリア判定に使う。色は緑。goalPosは必要ない。末尾をゴール用にする。
 
 const WAIT = 1;
 const LIVE = 2;
@@ -160,10 +161,10 @@ class unit{
 		let ax = this.x * gridSize;
 		let ay = this.y * gridSize;
 		noStroke();
-		if(this.state & STATIC){ fill(238, 185, 0); }else if(this.state & MOVE){ fill(0, 0, 255); }else if(this.state & FREEZE){ fill(255, 0, 0); }
+		if(this.state & STATIC){ fill(238, 185, 0); }else if(this.state & MOVE){ fill(0, 0, 255); }else if(this.state & FREEZE){ fill(255, 0, 0); }else if(this.state & GOAL){ fill(34, 177, 76); }
 		translate(ax, ay);
 		rect(0, 0, gridSize, gridSize);
-		if(this.state & STATIC){ fill(255, 230, 140); }else if(this.state & MOVE){ fill(180, 180, 255); }else if(this.state & FREEZE){ fill(255, 180, 180); }
+		if(this.state & STATIC){ fill(255, 230, 140); }else if(this.state & MOVE){ fill(180, 180, 255); }else if(this.state & FREEZE){ fill(255, 180, 180); }else if(this.state & GOAL){ fill(137, 233, 166); }
 		unit.drawPath(this.patternId[0]);
 		unit.drawPath(this.patternId[1]);
 		pop();
@@ -278,20 +279,22 @@ class ball{
 		}
 	}
 	convert(){
-		// 乗り換え処理. 成功したらtrueを返す
+		// 乗り換え処理.
+		// クリアはGOALユニット通過時とする。
+		if(this.currentUnit.state & GOAL){ this.clear(); return; } // このように変更。
+		// 以下はクリアでない場合の処理。
 		this.currentUnit.inball = false;
 		let direction = calc_dir(this.out);
 		let x = this.currentUnit.x + direction[0], y = this.currentUnit.y + direction[1];
-		// クリアは基本的に右端に達した時とする。
-		if(x > (width / gridSize) - 1){ this.clear(); return; }
 		let nextUnitId = find_unit(x, y);
 		// 右端に達する以外で何もない場合にFAILEDってことで。
 		if(nextUnitId < 0){ this.kill(); return; }
 		let nextIn = (this.out + 2) % 4; // 次のinに設定される入口のid. これをnextUnitが持っていなければDEAD.
 		// 具体的には0, 2なら2, 0で1, 3なら3, 1.
 		let u = uArray[nextUnitId];
+		// ユニットがあっても入れない場合はFAILEDってことで。
 		if(u.patternId[0] !== nextIn && u.patternId[1] !== nextIn){ this.kill(); return; }
-		// 持っている場合はそこが新しいinになる・・
+		// 入れる場合の処理。
 		this.set_unit(u, nextIn);
 	}
 	kill(){
@@ -363,7 +366,7 @@ function catch_unit(){
 	if(id < 0){ return; }
 	let u = uArray[id];
 	if(myCursor.target === undefined){
-		if((u.state & FREEZE) || u.inball){ return; } // ボールが入っているか、FREEZEのユニットは捕獲できない
+		if((u.state & (FREEZE | GOAL)) || u.inball){ return; } // ボールが入っているか、FREEZE,GOALのユニットは捕獲できない
 		myCursor.set_target(u);
 		return;
 	}else{
@@ -407,22 +410,15 @@ function createBlockArray(posArray){
 function createStage(stageNumber){
 	//if(stageNumber === 1){ createStage_test(); return; }
 	let d = data["stage" + stageNumber];
-	//console.log(gridSize);
 	gridSize = d.gridSize;
 	col = d.col;
-	console.log(d.col);
-	//console.log(d.gridSize);
-	let posArray = d.posArray;
-	let typeArray = d.typeArray;
 	let stateArray = constArray(d.static, STATIC);
 	stateArray.push(...constArray(d.freeze, FREEZE));
-	createUnitArray(posArray, typeArray, stateArray);
-	//console.log(uArray);
+	stateArray.push(GOAL); // 末尾をゴール用にすればgoalPosの必要はないよね。
+	createUnitArray(d.posArray, d.typeArray, stateArray);
 	createBlockArray(d.blockArray);
-	//let col = Math.floor(width / gridSize);
 	myCursor.set_cursor(d.cursorPos % col, Math.floor(d.cursorPos / col));
 	// ここfind_unitで出せるようにしたい。いちいち番号変えるの面倒。
-	//myBall.set_unit(uArray[d.ballPos], 0);
 	let index = find_unit(d.ballPos % col, Math.floor(d.ballPos / col));
 	myBall.set_unit(uArray[index], 0);
 }
