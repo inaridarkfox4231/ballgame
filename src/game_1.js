@@ -13,6 +13,7 @@ let blocks = [];
 let myBall;
 let stageNumber;
 let gridSize;
+let col; // colだけでいいやね
 // row(行数、横の列の本数)とcol(列数、縦の列の本数)もグローバルにして（本来はクラスとかにしてまとめるべき・・）、
 // ステージごとにサイズを決められるようにしたら面白そう。
 // あとスタート位置とかフェイズとかゴール条件とかいじって上とか下から出たり入ったりできるようにしたいわね。
@@ -389,7 +390,7 @@ function createUnitArray(posArray, typeArray, stateArray){
 	for(let i = 0; i < posArray.length; i++){
 		let p = posArray[i];
 		let t = typeArray[i];
-		let col = Math.floor(width / gridSize);
+		//let col = Math.floor(width / gridSize);
 		uArray.push(new unit(p % col, Math.floor(p / col), t & 3, (t >> 2) & 3, i, stateArray[i]));
 	}
 }
@@ -398,7 +399,7 @@ function createBlockArray(posArray){
 	blocks = [];
 	for(let i = 0; i < posArray.length; i++){
 		let p = posArray[i];
-		let col = Math.floor(width / gridSize);
+		//let col = Math.floor(width / gridSize);
 		blocks.push(new block(p % col, Math.floor(p / col)));
 	}
 }
@@ -408,6 +409,8 @@ function createStage(stageNumber){
 	let d = data["stage" + stageNumber];
 	//console.log(gridSize);
 	gridSize = d.gridSize;
+	col = d.col;
+	console.log(d.col);
 	//console.log(d.gridSize);
 	let posArray = d.posArray;
 	let typeArray = d.typeArray;
@@ -416,7 +419,7 @@ function createStage(stageNumber){
 	createUnitArray(posArray, typeArray, stateArray);
 	//console.log(uArray);
 	createBlockArray(d.blockArray);
-	let col = Math.floor(width / gridSize);
+	//let col = Math.floor(width / gridSize);
 	myCursor.set_cursor(d.cursorPos % col, Math.floor(d.cursorPos / col));
 	// ここfind_unitで出せるようにしたい。いちいち番号変えるの面倒。
 	//myBall.set_unit(uArray[d.ballPos], 0);
