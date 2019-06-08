@@ -51,6 +51,7 @@ function setup() {
 	myBall = new ball();
 	stageNumber = 1;
 	gridSize = 0;
+	col = 0;
 	createStage(stageNumber);
 	intervalCount = 60;
 	//noLoop();
@@ -408,7 +409,7 @@ function createBlockArray(posArray){
 }
 
 function createStage(stageNumber){
-	//if(stageNumber === 1){ createStage_test(); return; }
+	if(stageNumber === 1){ createStage_test(); return; }
 	let d = data["stage" + stageNumber];
 	gridSize = d.gridSize;
 	col = d.col;
@@ -424,20 +425,21 @@ function createStage(stageNumber){
 }
 
 // テスト用のクリエイト関数
-/*
+
 function createStage_test(){
 	gridSize = 60;
-	let posArray = [21, 31, 51, 52, 4, 30, 41, 39, 74];
-	let typeArray = [9 ,12, 14, 4, 4, 8, 13, 8, 8];
-	let stateArray = constArray(4, STATIC);
-	stateArray.push(...constArray(5, FREEZE));
+	col = 6;
+	let posArray = [10, 13, 14, 15, 16, 12, 4];
+	let typeArray = [13, 8, 8, 8, 12, 8, 13];
+	let stateArray = constArray(5, STATIC);
+	stateArray.push(...constArray(1, FREEZE));
+	stateArray.push(GOAL);
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([0, 10, 20, 40, 50, 60, 70, 42, 43, 44, 54, 64, 5, 35, 25, 26, 27, 29, 9, 19, 49, 59, 69, 79, 33, 46, 55]);
-	let col = Math.floor(width / gridSize);
-	myCursor.set_cursor(31 % col, Math.floor(31 / col));
-	let index = find_unit(30 % col, Math.floor(30 / col));
+	createBlockArray([0, 1, 2, 24, 25, 26, 29]);
+	myCursor.set_cursor(13 % col, Math.floor(13 / col));
+	let index = find_unit(12 % col, Math.floor(12 / col));
 	myBall.set_unit(uArray[index], 0);
-}*/
+}
 
 function constArray(n, s){
 	let array = new Array(n);
