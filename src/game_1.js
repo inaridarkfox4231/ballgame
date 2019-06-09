@@ -24,7 +24,7 @@ let col; // col.
 // FREEZEのすべてのプロパティを受け継ぎつつかつそれをくぐるとクリアするみたいなやつー
 // スタート位置で遊ぶ場合は0のデフォルトもいじる（スタートフェイズ）。
 // row, col, startPhase, goalPos.
-const LAST_STAGE_NUMBER = 8;
+const LAST_STAGE_NUMBER = 9;
 //const GRID_SIZE = 60;
 
 let intervalCount;
@@ -431,17 +431,17 @@ function createStage(stageNumber){
 /*
 function createStage_test(){
 	gridSize = 60;
-	col = 6;
-	row = 6;
-	let posArray = [10, 13, 14, 15, 16, 12, 4];
-	let typeArray = [13, 8, 8, 8, 12, 8, 13];
-	let stateArray = constArray(5, STATIC);
-	stateArray.push(...constArray(1, FREEZE));
+	col = 10;
+	row = 8;
+	let posArray = [6, 7, 8, 12, 13, 14, 15, 16, 18, 26, 27, 28, 32, 38, 42, 43, 44, 52, 54, 61, 62, 63, 64, 60, 22, 77];
+	let typeArray = [12, 8, 14, 9, 8, 8, 8, 13, 13, 4, 8, 9, 13, 13, 9, 8, 4, 13, 13, 8, 14, 8, 12, 8, 13, 13];
+	let stateArray = constArray(23, STATIC);
+	stateArray.push(...constArray(2, FREEZE));
 	stateArray.push(GOAL);
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([0, 1, 2, 24, 25, 26, 29]);
-	myCursor.set_cursor(13 % col, Math.floor(13 / col));
-	let index = find_unit(12 % col, Math.floor(12 / col));
+	createBlockArray([20, 21, 23, 24, 30, 35, 40, 46, 56, 66, 75, 50, 70]);
+	myCursor.set_cursor(61 % col, Math.floor(61 / col));
+	let index = find_unit(60 % col, Math.floor(60 / col));
 	myBall.set_unit(uArray[index], 0);
 }*/
 
