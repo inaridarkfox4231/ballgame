@@ -196,11 +196,15 @@ class cursor{
 		this.x = 0;
 		this.y = 0;
 		this.target = undefined;
+		this.stroke_weight = 0.0;
 	}
 	set_cursor(x, y){
 		this.x = x;
 		this.y = y;
 		this.target = undefined; // ターゲットリセット。
+	}
+	set_stroke_weight(new_weight){
+		this.stroke_weight = new_weight;
 	}
 	update(dx, dy){
 		// はみだすのNG.
@@ -226,7 +230,7 @@ class cursor{
 	}
 	render(){
 		push();
-		strokeWeight(3.0);
+		strokeWeight(this.stroke_weight);
 		stroke(110);
 		noFill();
 		rect(this.x * gridSize, this.y * gridSize, gridSize, gridSize);
@@ -241,6 +245,7 @@ class ball{
 		this.in = -1;  // ユニットの入口
 		this.out = -1; // ユニットの出口
 		this.state = WAIT;
+		this.speed = 0;
 	}
 	set_unit(u, inId){
 		this.currentUnit = u;
@@ -250,10 +255,13 @@ class ball{
 		this.count = 0;
 		u.inball = true;
 	}
+	set_speed(new_speed){
+		this.speed = new_speed;
+	}
 	update(){
 		// countを進める、60に達したら乗り換え、失敗したらDEAD. LIVEのときしかupdateしない。
 		if(!(this.state & LIVE)){ return; }
-		if(keyIsDown(65)){ this.count += 1.5; }else{ this.count += 0.5; } // Aキーで加速
+		if(keyIsDown(65)){ this.count += this.speed * 3; }else{ this.count += this.speed; } // Aキーで3倍速
 		if(this.count > gridSize){
 			this.convert();
 		}
@@ -425,24 +433,29 @@ function createStage(stageNumber){
 	// ここfind_unitで出せるようにしたい。いちいち番号変えるの面倒。
 	let index = find_unit(d.ballPos % col, Math.floor(d.ballPos / col));
 	myBall.set_unit(uArray[index], 0);
+	myBall.set_speed(gridSize / 120); // 2秒で通過
+	myCursor.set_stroke_weight(gridSize / 20);
 }
 
 // テスト用のクリエイト関数
 /*
 function createStage_test(){
-	gridSize = 60;
+	gridSize = 24;
 	col = 10;
 	row = 8;
-	let posArray = [6, 7, 8, 12, 13, 14, 15, 16, 18, 26, 27, 28, 32, 38, 42, 43, 44, 52, 54, 61, 62, 63, 64, 60, 22, 77];
-	let typeArray = [12, 8, 14, 9, 8, 8, 8, 13, 13, 4, 8, 9, 13, 13, 9, 8, 4, 13, 13, 8, 14, 8, 12, 8, 13, 13];
-	let stateArray = constArray(23, STATIC);
+	let posArray = [6, 7, 8, 12, 13, 14, 15, 16, 18, 26, 27, 28, 43, 44, 54, 61, 62, 63, 64, 60, 22, 76];
+	let typeArray = [12, 8, 14, 9, 8, 8, 8, 13, 13, 4, 8, 9, 8, 4, 13, 8, 14, 8, 12, 8, 13, 13];
+	let stateArray = constArray(19, STATIC);
 	stateArray.push(...constArray(2, FREEZE));
 	stateArray.push(GOAL);
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([20, 21, 23, 24, 30, 35, 40, 46, 56, 66, 75, 50, 70]);
+	createBlockArray([20, 21, 23, 24, 30, 35, 40, 46, 56, 65, 74, 50, 70, 52]);
 	myCursor.set_cursor(61 % col, Math.floor(61 / col));
 	let index = find_unit(60 % col, Math.floor(60 / col));
-	myBall.set_unit(uArray[index], 0);
+	myBall.set_unit(uArray[index], 0); // ここをいじって壁面側（たとえば上側なら上とか）からボールが出てくるようにする。
+	// 角の場合は、双方に接していることはないから問題ない・・（双方に接したらすぐ終わっちゃうでしょ）
+	myBall.set_speed(gridSize / 120); // 2秒で通過
+	myCursor.set_stroke_weight(gridSize / 20);
 }*/
 
 function constArray(n, s){
