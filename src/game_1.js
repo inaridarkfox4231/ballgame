@@ -440,18 +440,18 @@ function createStage(stageNumber){
 // テスト用のクリエイト関数
 /*
 function createStage_test(){
-	gridSize = 24;
+	gridSize = 60;
 	col = 10;
 	row = 8;
-	let posArray = [6, 7, 8, 12, 13, 14, 15, 16, 18, 26, 27, 28, 43, 44, 54, 61, 62, 63, 64, 60, 22, 76];
-	let typeArray = [12, 8, 14, 9, 8, 8, 8, 13, 13, 4, 8, 9, 8, 4, 13, 8, 14, 8, 12, 8, 13, 13];
-	let stateArray = constArray(19, STATIC);
-	stateArray.push(...constArray(2, FREEZE));
+	let posArray = [11, 12, 13, 14, 15, 16, 18, 21, 25, 31, 41, 48, 55, 57, 58, 30, 73];
+	let typeArray = [9, 8, 8, 8, 9, 8, 4, 13, 13, 12, 13, 13, 14, 8, 12, 8, 13];
+	let stateArray = constArray(15, STATIC);
+	stateArray.push(...constArray(1, FREEZE));
 	stateArray.push(GOAL);
 	createUnitArray(posArray, typeArray, stateArray);
-	createBlockArray([20, 21, 23, 24, 30, 35, 40, 46, 56, 65, 74, 50, 70, 52]);
-	myCursor.set_cursor(61 % col, Math.floor(61 / col));
-	let index = find_unit(60 % col, Math.floor(60 / col));
+	createBlockArray([0, 3, 8, 19, 23, 26, 29, 33, 43, 53, 54, 65, 69, 70, 77, 78, 47]);
+	myCursor.set_cursor(31 % col, Math.floor(31 / col));
+	let index = find_unit(30 % col, Math.floor(30 / col));
 	myBall.set_unit(uArray[index], 0); // ここをいじって壁面側（たとえば上側なら上とか）からボールが出てくるようにする。
 	// 角の場合は、双方に接していることはないから問題ない・・（双方に接したらすぐ終わっちゃうでしょ）
 	myBall.set_speed(gridSize / 120); // 2秒で通過
