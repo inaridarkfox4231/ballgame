@@ -10,7 +10,7 @@ let myBall;
 let myCursor;
 let blocks = [];
 let hueSet = [0, 15, 30, 45, 60, 75, 90];
-//let soundSet = [];
+let soundSet = [];
 
 const STATIC = 0;
 const ACTIVE = 1;
@@ -20,6 +20,14 @@ const POWERED = 1; // 強化された状態でボールが当たるとボール�
 
 const timeCounter = document.createElement('div');
 document.body.appendChild(timeCounter);
+
+function preload(){
+	let dict = ["C4", "D4", "E4", "F4", "G4"];
+	for(let i = 0; i < 5; i++){
+	  let s = loadSound("https://inaridarkfox4231.github.io/assets/u-50_" + dict[i] + ".wav");
+	  soundSet.push(s);
+	}
+}
 
 function setup() {
 	createCanvas(480, 320);
@@ -126,6 +134,7 @@ class ball{
 			}
 		}
 		// ブロックとの反射
+    // ここにあのメソッドを放り込んで・・
 		for(let index = 0; index < blocks.length; index++){
 			let bx = blocks[index].x;
 			let by = blocks[index].y;
@@ -253,7 +262,7 @@ class block{
 		pop();
 	}
 	break_off(dmg){
-		//soundSet[this.typeId].play();
+		soundSet[this.typeId].play();
 		if(this.typeId <= 4){ this.tough -= dmg; this.typeId -= dmg; }
 		if( this.tough > 0 ){ return; }
 		for(let index = 0; index < blocks.length; index++){
