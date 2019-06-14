@@ -15,9 +15,6 @@ let soundSet = [];
 const STATIC = 0;
 const ACTIVE = 1;
 
-const NORMAL = 0;
-const POWERED = 1; // 強化された状態でボールが当たるとボールも強化される（6秒間）
-
 const timeCounter = document.createElement('div');
 document.body.appendChild(timeCounter);
 
@@ -222,19 +219,13 @@ class paddle{
 	constructor(){
 		this.x = width / 2;
 		this.w = 60;
-		this.state = NORMAL;
-		this.count = 0;
 	}
 	update(){
 		this.x = constrain(mouseX, this.w / 2, width - (this.w / 2));
-		if(this.count > 0){
-			this.count--;
-			if(this.count === 0){ this.state = NORMAL; }
-		}
 	}
 	render(){
 		push();
-		if(this.state === NORMAL){ fill(70, 100, 100); }else{ fill(0, 100, 100); }
+		fill(70, 100, 100);
 		rect(this.x - (this.w / 2), height - 40, this.w, 10);
 		pop();
 	}
@@ -278,8 +269,4 @@ block.id = 0;
 
 function mouseClicked(){
 	if(myBall.state === STATIC){ myBall.activate(); return; }
-	if(myBall.state === ACTIVE && myPaddle.state === NORMAL){
-		myPaddle.state = POWERED;
-		myPaddle.count = 20;
-	}
 }
